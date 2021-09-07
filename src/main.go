@@ -13,6 +13,8 @@ func philosopher(leftFork fork, rightFork fork) {
 		// ...
 
 		// - put down both forks
+
+		// AHHHHH deadlock! alle har spurgt venstre - men kan ikke spørge højre
 	}
 }
 
