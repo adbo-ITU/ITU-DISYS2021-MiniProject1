@@ -1,11 +1,5 @@
 package main
 
-import (
-	"sync"
-)
-
-var arbiter sync.Mutex
-
 type fork struct {
 	isPickedUp bool
 	numPickUps uint64

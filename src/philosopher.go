@@ -1,11 +1,15 @@
 package main
 
-import "time"
+import (
+	"time"
+)
 
 type philosopher struct {
+	id        int
 	isEating  bool
 	numEats   int
 	numThinks int
+	events    chan<- philosopher
 }
 
 const doNothing = 1
@@ -32,13 +36,15 @@ func (p philosopher) philosopherLife(leftFork fork, rightFork fork) {
 		if willPickUp {
 			p.isEating = true
 			p.numEats++
+			p.events <- p
 		} else {
 			p.numThinks++
+			p.events <- p
 		}
 
 		arbiter.Unlock()
 
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(2 * time.Millisecond)
 
 		if p.isEating {
 			arbiter.Lock()
