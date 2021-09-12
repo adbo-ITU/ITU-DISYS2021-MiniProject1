@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	N = 40
+	N = 5
 )
 
 var forks [N]fork
