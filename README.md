@@ -1,5 +1,7 @@
 # ITU-DISYS2021-MiniProject1
 ## Group members
+Group name: *Point of Go return*
+
 - Adrian Borup (adbo@itu.dk)
 - Andreas Wachs (ahja@itu.dk)
 - Anne M. Bartholdy-Falk (anmb@itu.dk)
