@@ -1,13 +1,21 @@
 package main
 
-import "time"
+import (
+	"time"
+)
 
 type philosopher struct {
 	id        int
 	isEating  bool
 	numEats   int
 	numThinks int
-	events    chan<- philosopher
+	input     chan int
+	output    chan PhilosopherStatus
+}
+
+type PhilosopherStatus struct {
+	numEats   int
+	numThinks int
 }
 
 const doNothing = 1
@@ -16,6 +24,14 @@ const putDown = 3
 
 func (p philosopher) philosopherLife(leftFork fork, rightFork fork) {
 	for {
+		select {
+		// if an input request is received, write a response to output
+		case <-p.input:
+			p.output <- PhilosopherStatus{numEats: p.numEats, numThinks: p.numThinks}
+		// No input request, move on
+		default:
+		}
+
 		arbiter.Lock()
 
 		leftStatus := <-leftFork.output
@@ -34,10 +50,8 @@ func (p philosopher) philosopherLife(leftFork fork, rightFork fork) {
 		if willPickUp {
 			p.isEating = true
 			p.numEats++
-			p.events <- p
 		} else {
 			p.numThinks++
-			p.events <- p
 		}
 
 		arbiter.Unlock()
@@ -50,8 +64,8 @@ func (p philosopher) philosopherLife(leftFork fork, rightFork fork) {
 			<-rightFork.output // prepare right fork to receive message
 			leftFork.input <- putDown
 			rightFork.input <- putDown
+			p.isEating = false
 			arbiter.Unlock()
-			time.Sleep(2 * time.Millisecond)
 		}
 	}
 }

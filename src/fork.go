@@ -3,8 +3,8 @@ package main
 type fork struct {
 	isPickedUp bool
 	numPickUps uint64
-	input      chan int        // <- action: do i toggle the picked up status?
-	output     chan ForkStatus // <- info: times picked up, is it currently picked up
+	input      chan int
+	output     chan ForkStatus
 }
 
 type ForkStatus struct {
