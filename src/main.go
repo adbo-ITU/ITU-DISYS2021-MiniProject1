@@ -19,7 +19,7 @@ func main() {
 	eventChannel := make(chan philosopher)
 
 	// initialize the forks
-	for i, _ := range forks {
+	for i := range forks {
 		inputBuffer := make(chan int)
 		outputBuffer := make(chan ForkStatus)
 		forkBuffer := fork{isPickedUp: false, numPickUps: 0, input: inputBuffer, output: outputBuffer}
@@ -28,7 +28,7 @@ func main() {
 	}
 
 	// initialize the philosophers
-	for i, _ := range philosophers {
+	for i := range philosophers {
 		philosopherBuffer := philosopher{id: i, isEating: false, numEats: 0, numThinks: 0, events: eventChannel}
 		philosophers[i] = philosopherBuffer
 		go philosophers[i].philosopherLife(forks[i], forks[(i+1)%N])
