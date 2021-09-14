@@ -9,40 +9,40 @@ const (
 	N = 5
 )
 
+// Our forks and philosophers are saved in these two global arrays
 var forks [N]fork
 var philosophers [N]philosopher
+
+// Only one goroutine can access forks and philosophers at once - this arbiter
+// controls that
 var arbiter sync.Mutex
 
 func main() {
 	// initialize the forks
 	for i := range forks {
-		inputChannel := make(chan int)
-		outputChannel := make(chan ForkStatus)
-		forkBuffer := fork{isPickedUp: false, numPickUps: 0, input: inputChannel, output: outputChannel}
-		forks[i] = forkBuffer
-		go forkBuffer.forkLife()
+		forks[i] = NewFork()
+		go forks[i].forkLife()
 	}
 
 	// initialize the philosophers
 	for i := range philosophers {
-		inputChannel := make(chan int)
-		outputChannel := make(chan PhilosopherStatus)
-		philosopherBuffer := philosopher{id: i, isEating: false, numEats: 0, numThinks: 0, input: inputChannel, output: outputChannel}
-		philosophers[i] = philosopherBuffer
+		philosophers[i] = NewPhilosopher()
 		go philosophers[i].philosopherLife(forks[i], forks[(i+1)%N])
 	}
 
-	// prepare for the job of the main thread: printing the pState of the philosophers
+	// Prepare to recieve current states of the philosophers and forks
 	var pState [N]PhilosopherStatus
 	var fState [N]ForkStatus
 
 	for {
+		// Query all of the philosophers for their current state
 		for i, p := range philosophers {
 			p.input <- 1
 			reply := <-p.output
 			pState[i] = reply
 		}
 
+		// Query all of the forks for their current state
 		for i, f := range forks {
 			reply := <-f.output
 			f.input <- doNothing
@@ -54,11 +54,13 @@ func main() {
 
 		var eatsSum uint64
 		var thinksSum uint64
+		// Print all philosopher info
 		for i, philosopher := range pState {
-			fmt.Printf("[P #%d]: Has eaten %d times. Has thought %d times.\n",
+			fmt.Printf("[P #%d]: Has eaten %d times. Has thought %d times. Is eating: %t\n",
 				i,
 				philosopher.numEats,
-				philosopher.numThinks)
+				philosopher.numThinks,
+				philosopher.isEating)
 
 			eatsSum += uint64(philosopher.numEats)
 			thinksSum += uint64(philosopher.numThinks)
@@ -67,6 +69,7 @@ func main() {
 		fmt.Printf("Total eats: %d, total thinks: %d.\n\n", eatsSum, thinksSum)
 
 		var pickupSum uint64
+		// Print all fork info
 		for i, fork := range fState {
 			fmt.Printf("[F #%d]: Has been picked up %d times, Is picked up: %t.\n",
 				i,
@@ -78,6 +81,7 @@ func main() {
 
 		fmt.Printf("Total number of fork pickups: %d.\n\n", pickupSum)
 
+		// Print additional info to check if the numbers are as expected
 		fmt.Printf("pickups/eats ratio: %f (expected: 2).\n", float64(pickupSum)/(float64(eatsSum)))
 		fmt.Printf("eats/thinks ratio:  %f (expected: 2/3 = 0.666..).\n", float64(eatsSum)/float64(thinksSum))
 	}

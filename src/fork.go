@@ -14,6 +14,9 @@ type ForkStatus struct {
 
 func (f fork) forkLife() {
 	for {
+		// Design decision: interacting with forks requires to read their status
+		// and later telling them what the single philosopher will do with them
+
 		f.output <- ForkStatus{isPickedUp: f.isPickedUp, numPickUps: f.numPickUps}
 		action := <-f.input
 
@@ -24,4 +27,10 @@ func (f fork) forkLife() {
 			f.isPickedUp = false
 		}
 	}
+}
+
+func NewFork() fork {
+	inputChannel := make(chan int)
+	outputChannel := make(chan ForkStatus)
+	return fork{isPickedUp: false, numPickUps: 0, input: inputChannel, output: outputChannel}
 }
