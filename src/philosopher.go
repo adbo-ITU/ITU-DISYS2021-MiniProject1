@@ -1,8 +1,6 @@
 package main
 
-import (
-	"time"
-)
+import "time"
 
 type philosopher struct {
 	id        int
@@ -53,6 +51,7 @@ func (p philosopher) philosopherLife(leftFork fork, rightFork fork) {
 			leftFork.input <- putDown
 			rightFork.input <- putDown
 			arbiter.Unlock()
+			time.Sleep(2 * time.Millisecond)
 		}
 	}
 }
